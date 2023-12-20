@@ -1,0 +1,22 @@
+Features:
+-Login Page with google auth
+-Ability for user to switch between multiple tables in the database
+-Optimize speed at which questions and responses are displayed
+-Look into visual representations of data
+-Skip button to skip responses showing up letter by letter
+-Look into making switching pages quicker
+-About Page
+
+Ask if theres anyone else I can talk to about AI
+
+Since I only have one semester of school left this would be the time where I started to
+apply to full time jobs. That being said I was wondering if and when I could expect to
+see a full time offer from 66
+
+ASk questions for visualization
+
+Priority:
+Visualizations
+Login
+Pulling from multiple tables
+Testing
