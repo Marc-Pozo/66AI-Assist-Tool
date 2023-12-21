@@ -33,24 +33,25 @@ def create_agent():
     return create_sql_agent(llm=llm,toolkit=toolkit,verbose=1,top_k=10,)
 
 
+# Not in use
 def login_page():
     st.title("Google Auth Test")
     st.subheader("Google Authentication")
 
     token = st.text_input("Enter your Google ID token", type="password")
 
+    # TODO add google API support
     if st.button("Authenticate"):
         try:
+            # Will add Google OAuth here
             if token == "password":
                 return true
-            # Continue with the rest of your app logic here
         except ValueError as e:
             st.error("Authentication failed")
             st.error(e)
             return false
 
-def chat_page():
-    
+def chat_page():    
 
     st.title('AI Assist Tool')
 
