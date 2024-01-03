@@ -15,7 +15,7 @@ if uploaded_file:
 
 st.write(data)
 
-prompt = "Plot the JobTitle over the salary for each entry in the table, the table is already stored in python as the variable data.\n Make sure that the response only includes code.\n" + data.to_string()
+prompt = "Plot the JobTitle over the salary for each entry in the table, the table is already stored in python as the variable data.\n Make sure that the response only includes code.\n"
 
 # Choose the LLM
 llm = VertexAI(temperature=0, model="chat-bison")
@@ -30,5 +30,7 @@ llm_response = llm_response[10:]
 tilde_line = llm_response.find("```")
 
 llm_response = llm_response[:tilde_line]
+
+print(llm_response)
 
 plot_area.pyplot(exec(llm_response))      
