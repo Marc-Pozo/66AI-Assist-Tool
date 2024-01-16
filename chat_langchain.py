@@ -83,7 +83,7 @@ agent_executor = create_agent(option)
 
 uploaded_file = st.sidebar.file_uploader(":computer: Load a CSV file:", type="csv")
 if uploaded_file:
-    # Read in the data, add it to the list of available datasets. Give it a nice name.
+    # Read in the data
     file_name = uploaded_file.name[:-4].capitalize()
     data= pd.read_csv(uploaded_file)
     
@@ -94,30 +94,29 @@ if "messages" not in st.session_state:
 # Finds any messages in the state and prints them
 for msg in st.session_state.messages:
     st.chat_message(msg.role).write(msg.content)
+    print(msg.role, "and ",msg.content)
 
 
 if prompt := st.chat_input():
     st.session_state.messages.append(ChatMessage(role="user", content=prompt))
     st.chat_message("user").write(prompt)
 
-    with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            full_response = ""
+    message_placeholder = st.empty()
 
     if checkVis and uploaded_file:
         response = create_vis(prompt)
 
         plot_area = st.empty()
         plot_area.pyplot(exec(response))     
-        st.session_state.messages.append(plot_area)      
+        st.session_state.messages.append({"role": "assistant", "content": plot_area})      
     else:
         response = agent_executor.run(prompt)
 
         for i in range(len(response) + 1):
             message_placeholder.markdown("%s" % response[0:i])
             time.sleep(0.1)
-
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append(ChatMessage(role="assistant", content=response))
+        st.chat_message("assistant").write(response)
 
     
 
