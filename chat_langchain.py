@@ -1,4 +1,5 @@
 import google.auth
+import json
 from google.cloud import bigquery
 from sqlalchemy import *
 from sqlalchemy.engine import create_engine
@@ -22,16 +23,6 @@ project_id = "poc-ai-assist-tool"
 dataset_id = "salesforce_data"
 table_id = 'sample_data'
 
-# Message stream handler
-class StreamHandler(BaseCallbackHandler):
-    def __init__(self, container, initial_text=""):
-        self.container = container
-        self.text = initial_text
-
-    def on_llm_new_token(self, token: str, **kwargs) -> None:
-        self.text += token
-        self.container.markdown(self.text)
-
 # Creates Langchain agent and connects to Vertex and BigQuery
 def create_agent():
     # Connect to URI with the table    
@@ -39,7 +30,7 @@ def create_agent():
     # Grab the DB
     db = SQLDatabase.from_uri(sqlalchemy_url)
     # Set our LLM to chat-bison
-    llm = VertexAI(temperature=0, model="chat-bison")
+    llm = VertexAI(temperature=0, model="chat-bison",max_output_tokens=200)
     # Define the toolkit to be used
     toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
@@ -68,7 +59,7 @@ def download_table_to_csv(project_id, dataset_id, table_id):
 # Creates a visualization using matplotlib
 def create_vis(prompt):
     # Modify the users prompt
-    prompt = prompt + "\nThe table is already stored in python as the variable table.\n Make sure that the response only includes code and utilizes streamlit."
+    prompt = prompt + "\nThe table is already stored in python as the variable table.\n Make sure that the response only includes code."
     
     # Setup access to Verttex
     llm = VertexAI(temperature=0, model="chat-bison")
@@ -94,11 +85,29 @@ def page_setup():
     
     st.sidebar.header("Welcome to the 66Degrees AI Assist Tool", divider='rainbow')
 
+def bar_chart(data_string):
+
+    data = json.loads(data_string)
+
+    department = [entry["Department"] for entry in data]
+    salary = [entry["Salary"] for entry in data]
+
+    plt.bar(department,salary)
+    plt.xlabel('Department')
+    plt.ylabel('Salary')
+    plt.title('Bar Graph from JSON')
+    plt.show()
+    plot_area = st.empty()
+    plot_area.pyplot(plt)
+
+
+
 # Creates the sidebar, title and header
 page_setup()
 
+
 # When checked allows for visualizations to be generated
-checkVis = st.sidebar.checkbox("Generate Visualization?")
+checkVis = st.checkbox("Generate Visualization?")
 
 # Creates the agent
 agent_executor = create_agent()
@@ -120,18 +129,30 @@ if prompt := st.chat_input():
     message_placeholder = st.empty()
 
     if checkVis:
+        # Download the table locally
         table = download_table_to_csv(project_id, dataset_id, table_id)
+        # Generate a response
         response = create_vis(prompt)
 
-        with st.chat_message("assistant"):
-            plot_area = exec(response) 
-            st.session_state.messages.append(ChatMessage(role="vis", content=response))   
+        # Try executing the response
+        try:
+            plot_area = st.empty()
+            plot_area.pyplot(exec(response))     
+            st.session_state.messages.append(plot_area)      
+            st.session_state.messages.append({"role": "assistant", "content": plot_area})
+        # Handle user typing in wrong column name error
+        except KeyError:
+            error = "Names of columns must be typed in accurately in order for me to create a visualization."
+            st.session_state.messages.append(ChatMessage(role = "assistant", content = error ))      
+            st.chat_message("assistant").write(error)                
+
     else:
         response = agent_executor.run(prompt)
 
-        for i in range(len(response) + 1):
-            message_placeholder.markdown("%s" % response[0:i])
-            time.sleep(0.1)
+        #for i in range(len(response) + 1):
+        #    message_placeholder.markdown("%s" % response[0:i])
+         #   time.sleep(0.1)
+        bar_chart(response)
         st.session_state.messages.append(ChatMessage(role="assistant", content=response))
 
     
