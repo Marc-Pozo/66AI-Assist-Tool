@@ -1,0 +1,9 @@
+google.cloud
+google.auth
+sqlalchemy
+sqlalchemy-bigquery
+langchain
+streamlit
+matplotlib
+pandas
+google-cloud-aiplatform
