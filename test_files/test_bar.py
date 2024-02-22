@@ -17,11 +17,20 @@ data_string = json.dumps(data)
 json_data = json.loads(data_string)
 
 
+# bar chart
+#for key, values in json_data.items():
+#        plt.bar(x=key,height = float(values))
 
-for key, values in json_data.items():
-        plt.bar(x=key,height = float(values))
 
-plt.title('Bar Graph from JSON')
+keys = []
+values  = []
+for key, value in json_data.items():
+    values.append(float(value))
+    keys.append(key)
+
+plt.pie(values,labels=keys)
+
+plt.title('Pie Chart')
 plt.xticks(rotation=45, fontsize=8)
 plt.show()
 plot_area = st.empty()
