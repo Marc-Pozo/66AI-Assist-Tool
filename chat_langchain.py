@@ -41,6 +41,7 @@ def page_setup():
     
     st.sidebar.header("Welcome to the 66Degrees AI Assist Tool", divider='rainbow')
 
+
 # Creates and returns Bar Charts
 def bar_chart(data_string, x_name, y_name):
     # Converts the data from string to JSON
@@ -50,6 +51,8 @@ def bar_chart(data_string, x_name, y_name):
     # Extracts the key value pairs and plots them
     for key, values in data.items():
         plt.bar(x=key,height = float(values))
+
+
 
     # Formats the graph and returns it
     plt.title('Bar Graph')
@@ -75,6 +78,7 @@ def scatter_plot(data_string, x_name, y_name):
     plt.xticks(rotation=45, fontsize=8)
     return plt
 
+# TODO_MARCELINO: Fix bug related to Pie Charts
 def pie_chart(data_string):
     # Converts the data from string to JSON
     data = json.dumps(data_string)
@@ -136,14 +140,17 @@ if prompt := st.chat_input():
 
     if checkVis and selectbox != "None":
         # Generate a response
+        # TODO_MARCELINO: Generate the data first, then format it in a seperate step with a new prompt. Could lead to more consistency.
         response = agent_executor.run(prompt+" Return the data in a key value lists with no added text, characters or [] brackets.")        
         print(response)
         
         # Sometimes the AI acts in unexpected ways and returns bad data, so we try and catch errors.
         try:
+
             # Format the data to JSON
             data = format_to_JSON(response)
             print(data)
+
             # Use the JSON to generate a visualization based on what was selected
             if selectbox == "Bar Chart":
                 st.session_state.messages.append(ChatMessage(role="assistant", content="Bar Chart Visualization"))
